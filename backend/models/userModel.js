@@ -44,12 +44,13 @@ userSchema.methods.matchPassword = async function (passwordIn) {
   // userSchema.pre function is a middleware in Mongoose that allows you to define functions to be 
   // executed before certain operations occur
 userSchema.pre('save', async function (next) { // this is a middleware
-      if (!this.isModified('password')) {
+    console.log("pre running")  
+    if (!this.isModified('password')) {
         next();
       }
-    
+     
       const salt = await bcrypt.genSalt(10);
-      this.password = bcrypt.hash(this.password, salt);
+      this.password = await bcrypt.hash(this.password, salt);
       console.log(`this.password:${this.password}`)
     });
 const User=mongoose.model('Users',userSchema)

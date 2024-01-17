@@ -1,5 +1,7 @@
 
 const {User}=require('../models/userModel')
+const {generateToken} = require('../utils/tokenGeneration')
+
 
 const createUser=async(req,res)=>{
     console.log("running createUser")
@@ -18,7 +20,7 @@ const createUser=async(req,res)=>{
         console.log(newuser)
 
         if (newuser) {
-
+             generateToken(res, newuser._id)
              res.status(201).json({
                   _id: newuser._id,
                   name: newuser.name,
@@ -36,4 +38,25 @@ const createUser=async(req,res)=>{
 
 }
 
-module.exports={createUser}
+const login=async(req,res)=>{
+    console.log(req.body)
+    const { email, password } = req.body;
+    console.log(`email: ${email}`)
+    const user = await User.findOne({ email });
+    
+    console.log(user)
+    if (user && (await user.matchPassword(password))) {
+      generateToken(res, user._id);
+  
+      res.json({
+        _id: user._id,
+        name: user.name,
+        email: user.email,
+      });
+    } else {
+      res.status(404);
+      res.send({"message":"user not found"})
+    }
+  };
+
+module.exports={createUser,login}
